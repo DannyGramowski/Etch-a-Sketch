@@ -81,7 +81,7 @@ function createCells() {
             cell.addEventListener('mouseenter', () => {
                 cell.style.backgroundColor = 'red';
                 //check if thing has animation
-                animations.push(new ColorAnimation(cell));
+                animations.splice(0, 0, new ColorAnimation(cell));
                 updateAnimations();
             });
             cell.addEventListener('mouseleave', () => {
