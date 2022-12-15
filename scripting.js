@@ -26,6 +26,8 @@ class ColorAnimation {
 
 let x = 65;
 let y = 65;
+const date = new Date();
+let previousTime = date.getTime();
 let hoverColor = new color(255, 0, 0)
 let defaultColor = new color(120, 238, 238);
 
@@ -44,15 +46,24 @@ gridContainer.style.backgroundColor = 'rgb(0, 0, 0)';
 
 createCells();
 
+let worker = new Worker("scripting.js");
+worker.onmessage = updateAnimations();
+
 for (let i = 1; i <= 10; i++) {
     console.log(colorToStr(lerp(hoverColor, defaultColor, 1 / 10 * i)))
 }
 
-function updateAnimations() {
-    for(let i = animations.length - 1; i >= 0; i--) {
-        animations[i].update();
-        if(animations[i].isDone()) {
-            animations.splice(i, 1);
+async function updateAnimations() {
+    setTimeout();
+    while(true) {
+        console.log("update animations");
+        var currTime = date.getTime();
+        let deltaT = currTime-previousTime;
+        for(let i = animations.length - 1; i >= 0; i--) {
+            animations[i].update();
+            if(animations[i].isDone()) {
+                animations.splice(i, 1);
+            }
         }
     }
 }
@@ -82,7 +93,7 @@ function createCells() {
                 cell.style.backgroundColor = 'red';
                 //check if thing has animation
                 animations.splice(0, 0, new ColorAnimation(cell));
-                updateAnimations();
+                //updateAnimations();
             });
             cell.addEventListener('mouseleave', () => {
                 cell.style.backgroundColor = colorToStr(defaultColor);
