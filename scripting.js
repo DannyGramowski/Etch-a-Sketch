@@ -1,105 +1,53 @@
-class color {
-    constructor(r, g, b) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-    }
-}
+import * as clr from './ColorUtil.js';
 
-class ColorAnimation {
-    constructor(cell) {
-        this.cell = cell;
-        this.color = hoverColor;
-        this.percent = 0;
-    }
-
-    update(params) {
-        this.color = lerp(this.color, defaultColor, this.percent);
-        this.percent += 0.02;
-        this.cell.style.backgroundColor = colorToStr(this.color);
-    }
-
-    isDone() {
-        return this.percent >= 1;
-    }
-}
-
-let x = 65;
-let y = 65;
-const date = new Date();
-let previousTime = date.getTime();
-let hoverColor = new color(255, 0, 0)
-let defaultColor = new color(120, 238, 238);
-
-let animations = [];
-
-const button = document.querySelector('button');
-button.onclick = () => {
-    let str = prompt("please enter a size", `${x} ${y}`).split(' ');
-    x = parse(str[0]);
-    y = parse(str[1]);
-    createCells();
-}
+const toolKit = document.querySelector('.tool-kit');
+const toolkitColors = document.querySelector('.tool-kit-colors');
+let displayWidth = 100;
+let displayHeight = 100;
+let toolBoxWidth = 3;
+let toolBoxButtonSize = 30;
+let defaultColor = new clr.Color(120, 238, 238);
+let drawColor;
 
 const gridContainer = document.querySelector('.grid-holder');
 gridContainer.style.backgroundColor = 'rgb(0, 0, 0)';
 
 createCells();
 
-let worker = new Worker("scripting.js");
-worker.onmessage = updateAnimations();
+createToolKit();
 
-for (let i = 1; i <= 10; i++) {
-    console.log(colorToStr(lerp(hoverColor, defaultColor, 1 / 10 * i)))
-}
+let mouseDown = false;
+document.body.onmousedown = function(evt) {
+    console.log("mouse down");
+    mouseDown = true;}
+document.body.onmouseup = (evt) => mouseDown = false;
 
-async function updateAnimations() {
-    setTimeout();
-    while(true) {
-        console.log("update animations");
-        var currTime = date.getTime();
-        let deltaT = currTime-previousTime;
-        for(let i = animations.length - 1; i >= 0; i--) {
-            animations[i].update();
-            if(animations[i].isDone()) {
-                animations.splice(i, 1);
-            }
+function createCells() {
+    gridContainer.style['grid-template-columns'] = setAutos(displayWidth);
+    gridContainer.style['grid-template-rows'] = setAutos(displayHeight);
+    clearCells();
+    for (let i = 0; i < displayHeight; i++) {
+        for (let j = 0; j < displayWidth; j++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.style.backgroundColor = clr.colorToStr(defaultColor);
+            cell.addEventListener('mouseenter', () => {
+                console.log("button doown " + mouseDown + " draw color " + clr.colorToStr(drawColor));
+                if(mouseDown && drawColor != null){
+                    cell.style.backgroundColor = clr.colorToStr(drawColor);
+                }
+            });
+            // cell.addEventListener('mouseleave', () => {
+            //     cell.style.backgroundColor = clr.colorToStr(defaultColor);
+            // });
+            gridContainer.append(cell);
         }
     }
-}
-
-function parse(str) {
-    let num = parseInt(str);
-    if (num > 100) num = 100;
-    return num;
 }
 
 function clearCells() {
     while (gridContainer.lastChild) {
         gridContainer.removeChild(gridContainer.lastChild);
-    }
-}
-
-function createCells() {
-    gridContainer.style['grid-template-columns'] = setAutos(x);
-    gridContainer.style['grid-template-rows'] = setAutos(y);
-    clearCells();
-    for (let i = 0; i < y; i++) {
-        for (let j = 0; j < x; j++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.style.backgroundColor = colorToStr(defaultColor);
-            cell.addEventListener('mouseenter', () => {
-                cell.style.backgroundColor = 'red';
-                //check if thing has animation
-                animations.splice(0, 0, new ColorAnimation(cell));
-                //updateAnimations();
-            });
-            cell.addEventListener('mouseleave', () => {
-                cell.style.backgroundColor = colorToStr(defaultColor);
-            });
-            gridContainer.append(cell);
-        }
     }
 }
 
@@ -111,31 +59,27 @@ function setAutos(len) {
     return output.trimEnd();
 }
 
+function createToolKit() {
+    toolKit.width = toolBoxWidth * toolBoxButtonSize;
+    createColorButtons();
+}
 
-
-//https://www.cuemath.com/linear-interpolation-formula/
-function lerp(from, to, percent) {
-    let r = lerpSingle(from.r, to.r, percent);
-    let g = lerpSingle(from.g, to.g, percent);
-    let b = lerpSingle(from.b, to.b, percent);
-    function lerpSingle(a, b, percent) {
-        return a + percent * (b - a)
+function createColorButtons() {
+    const colors = [clr.red, clr.orange, clr.yellow, clr.green, clr.blue, clr.purple, clr.pink, clr.white, clr.black, clr.grey]
+    toolkitColors.height = Math.ceil(colors.length / toolBoxWidth) * toolBoxButtonSize; 
+    for(const c of colors) {
+        let color = document.createElement('button');
+        color.style.width = toolBoxButtonSize.toString() + "px";
+        color.style.height = toolBoxButtonSize.toString() + "px";
+        color.className = "tool color"
+        color.style.background = clr.colorToStr(c);
+        color.onclick = () => {
+            console.log("clicked " + clr.colorToStr(c));
+            drawColor = c;
+        }
+        toolkitColors.append(color);
     }
-    return new color(r, g, b);
 }
 
-function convert(colorString) {
-    let output = [];
-    let split = colorString.split('(')[1].split(')')[0].split(',');
-    split.forEach(element => {
-        output.push(element.trim());
-    });
-
-    return new color(output[0], output[1], output[2]);
-}
-
-function colorToStr(clr) {
-    return `rgb(${clr.r}, ${clr.g}, ${clr.b})`;
-}
 
 
