@@ -8,16 +8,13 @@
     <title>Document</title>
 </head>
 <body>
-    <button class="set-size">Set New Size</button>
-    <br>
-    <br>
-    <br>
-
-    <div>
+    <div class="big-boy">
         <div class="grid-holder"></div>
 
         <div class="tool-kit">
             <div class="tool-kit-colors"></div>
+
+            <button class="eraser">Eraser</button>
 <!-- 
             <button class="tool color red"></button>
             <button class="tool color orange"></button>
@@ -31,6 +28,13 @@
     </div>
 
     <style>
+        .big-boy{
+            width: 1300px;
+            display: inline-grid;
+            grid-template-columns: auto auto;
+        }
+
+
         .grid-holder {
             height: 1000px;
             width: 1000px;
@@ -48,7 +52,10 @@
         }
 
         .tool-kit{
+            margin-left: -150px;
             height: 500px;
+            display: flex;
+            flex-direction: column;
         }
 
         .tool-kit-colors{
@@ -56,6 +63,7 @@
             display: inline-grid;
             grid-template-columns: auto auto auto;
         }
+        
         
     </style>
 </body>
